@@ -1,64 +1,37 @@
-import React, { useContext, useEffect, useState } from 'react'
+import React, { useContext, useState } from 'react'
 import { useNavigate } from 'react-router'
 import { AuthContext } from '../auth/AuthProvider'
+import { TaskContext } from './TaskContext'
 
 function Dashboard() {
-  const [tasks,setTasks] = useState([])
+  const { tasks, addTask, deleteTask, updateTask } = useContext(TaskContext)
+
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [newTask, setNewTask] = useState('')
   const [editTask, setEditTask] = useState(null)
   const [editTitle, setEditTitle] = useState('')
-  useEffect(()=>{
-    fetch('http://localhost:3000/tasks')
-    .then(res=>res.json())
-    .then(data=>setTasks(data))
-  },[])
+  
 
-      const handleAddTask = () => {
-      if (!newTask.trim()) {
-        alert('Task adı daxil et')
-        return
+      const handleAddTask = async () => {
+        if (!newTask.trim()) {
+          alert('Task adı daxil et')
+          return
+        }
+
+        const task = {
+          title: newTask,
+          completed: false
+        }
+
+        await addTask(task)
+
+        setNewTask('')
+        setIsModalOpen(false)
       }
 
-      const task = {
-        title: newTask,
-        completed: false
-      }
 
-      fetch('http://localhost:3000/tasks', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(task)
-      })
-        .then(res => res.json())
-        .then(data => {
-          setTasks(prev => [...prev, data])
-          setNewTask('')
-        })
-    }
-
-
-    const handleDeleteTask = (id) => {
-      const oldTasks = tasks
-
-      // UI-da dərhal sil
-      setTasks(tasks.filter((task) => task.id !== id))
-
-      fetch(`http://localhost:3000/tasks/${id}`, {
-        method: 'DELETE'
-      })
-        .then((res) => {
-          if (!res.ok) {
-            throw new Error('Task silinmədi')
-          }
-        })
-        .catch(() => {
-          // API uğursuz olsa taskı geri qaytar
-          setTasks(oldTasks)
-          alert('Task silinərkən xəta baş verdi')
-        })
+    const handleDeleteTask = async (id) => {
+      await deleteTask(id)
     }
 
     const handleEditTask = (task) => {
@@ -66,37 +39,19 @@ function Dashboard() {
       setEditTitle(task.title)
     }
 
-    const handleUpdateTask = () => {
+    const handleUpdateTask = async () => {
       if (!editTitle.trim()) {
         alert('Task adı daxil et')
         return
       }
 
-      const updatedTask = {
+      await updateTask({
         ...editTask,
         title: editTitle
-      }
-
-      fetch(`http://localhost:3000/tasks/${editTask.id}`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          title: editTitle
-        })
       })
-        .then(res => res.json())
-        .then(data => {
-          setTasks(
-            tasks.map(task =>
-              task.id === data.id ? data : task
-            )
-          )
 
-          setEditTask(null)
-          setEditTitle('')
-        })
+      setEditTask(null)
+      setEditTitle('')
     }
 
 
