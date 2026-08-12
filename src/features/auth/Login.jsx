@@ -7,28 +7,43 @@ import { AuthContext } from './AuthProvider';
 function Login() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [emailError, setEmailError] = useState('')
+  const [passwordError, setPasswordError] = useState('')
+  const [loginError, setLoginError] = useState('')
+
   const navigate = useNavigate();
   const {dispatch} = useContext(AuthContext)
 
   const handleSubmit = (e) => {
     e.preventDefault()
 
-    if (!email || !password) {
-      alert("Email və password daxil et")
-      return
+    setEmailError('')
+    setPasswordError('')
+    setLoginError('')
+
+    let hasError = false
+
+    if (!email) {
+      setEmailError('Email daxil et')
+      hasError = true
     }
 
     const emailCheck = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
-    if (!emailCheck.test(email)) {
-      alert("Düzgün email daxil et")
-      return
+    if (email && !emailCheck.test(email)) {
+      setEmailError('Düzgün email daxil et')
+      hasError = true
     }
 
-    if (password.length < 6) {
-      alert("Password ən azı 6 simvol olmalıdır")
-      return
+    if (!password) {
+      setPasswordError('Password daxil et')
+      hasError = true
+    } else if (password.length < 6) {
+      setPasswordError('Password ən azı 6 simvol olmalıdır')
+      hasError = true
     }
+
+    if (hasError) return
 
     const users = JSON.parse(localStorage.getItem("users")) || []
 
@@ -39,32 +54,30 @@ function Login() {
     )
 
     if (!user) {
-      alert("Email və ya password yanlışdır")
+      setLoginError('Email və ya password yanlışdır')
       return
     }
 
     const token = "fake-token-123"
     const expiresAt = Date.now() + 5 * 60 * 1000
 
-      localStorage.setItem(
-        "token",
-        JSON.stringify({
-          token,
-          expiresAt
-        })
-      )
-
-      dispatch({
-        type: 'LOGIN',
-        payload: {
-          token,
-          expiresAt
-        }
+    localStorage.setItem(
+      "token",
+      JSON.stringify({
+        token,
+        expiresAt
       })
+    )
+
+    dispatch({
+      type: 'LOGIN',
+      payload: {
+        token,
+        expiresAt
+      }
+    })
 
     navigate("/dashboard")
-
-    
   }
   return (
     <div className="min-h-screen flex items-center justify-center px-4 bg-gradient-to-br from-indigo-100 via-white to-purple-100">
@@ -90,6 +103,11 @@ function Login() {
               Email
             </label>
             <input value={email} onChange={(e)=>setEmail(e.target.value)} id="email" type="email" placeholder="yusif@gmail.com" className="w-full px-4 py-3.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-900 outline-none transition focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100"/>
+              {emailError && (
+                <p className="mt-1 text-sm text-red-500">
+                  {emailError}
+                </p>
+              )}
           </div>
           <div>
             <label htmlFor="password" className="block mb-2 text-sm font-semibold text-slate-700">
@@ -98,6 +116,16 @@ function Login() {
             <input value={password} onChange={(e)=>setPassword(e.target.value)}  id="password" type="password" placeholder="••••••••"
               className="w-full px-4 py-3.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-900 outline-none transition focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100"
             />
+            {passwordError && (
+              <p className="mt-1 text-sm text-red-500">
+                {passwordError}
+              </p>
+            )}
+            {loginError && (
+              <p className="text-sm text-red-500">
+                {loginError}
+              </p>
+            )}
           </div>
 
           <div className="flex items-center justify-between text-sm">
