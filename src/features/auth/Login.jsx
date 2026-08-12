@@ -44,13 +44,23 @@ function Login() {
     }
 
     const token = "fake-token-123"
+    const expiresAt = Date.now() + 5 * 60 * 1000
 
-    localStorage.setItem("token", token)
+      localStorage.setItem(
+        "token",
+        JSON.stringify({
+          token,
+          expiresAt
+        })
+      )
 
-    dispatch({
-      type: 'LOGIN',
-      payload: token
-    })
+      dispatch({
+        type: 'LOGIN',
+        payload: {
+          token,
+          expiresAt
+        }
+      })
 
     navigate("/dashboard")
 
