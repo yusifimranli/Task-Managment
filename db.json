@@ -1,15 +1,4 @@
 {
-  "tasks": [
-    {
-      "title": "sdfsdf",
-      "completed": false,
-      "id": "mu5nve_qXuc"
-    },
-    {
-      "title": "fsdfds",
-      "completed": false,
-      "id": "y1UAVHIOC20"
-    }
-  ],
+  "tasks": [],
   "$schema": "./node_modules/json-server/schema.json"
 }
